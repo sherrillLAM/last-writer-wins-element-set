@@ -25,6 +25,13 @@ public class LWW {
 	 * @return Returns true if adding element successfully.
 	 */
 	public boolean Add(Integer element, LocalDateTime time) {
+		// If element exists in addSet, compare the existing time stamp to parameter "time".
+		// Only update time stamp when parameter "time" is more recent.
+		LocalDateTime existing_time = addSet.get(element);
+		if(existing_time != null && existing_time.isAfter(time)) {
+			return true;
+		}
+
 		addSet.put(element, time);
 		return true;
 	}
@@ -39,6 +46,13 @@ public class LWW {
 	 * @return Returns true if removing element successfully.
 	 */
 	public boolean Remove(Integer element, LocalDateTime time) {
+		// If element exists in removeSet, compare the existing time stamp to parameter "time".
+		// Only update time stamp when parameter "time" is more recent.
+		LocalDateTime existing_time = removeSet.get(element);
+		if(existing_time != null && existing_time.isAfter(time)) {
+			return true;
+		}
+
 		removeSet.put(element, time);
 		return true;
 	}
