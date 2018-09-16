@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LWW {
-	private ConcurrentHashMap<Integer, LocalDateTime> addSet;
-	private ConcurrentHashMap<Integer, LocalDateTime> removeSet;
+	private ConcurrentHashMap<Object, LocalDateTime> addSet;
+	private ConcurrentHashMap<Object, LocalDateTime> removeSet;
 
 	/**
 	 * Create an empty LWW set and initialize Add set and Remove set.
@@ -24,7 +24,7 @@ public class LWW {
 	 *            The time stamp of the add action.
 	 * @return Returns true if adding element successfully.
 	 */
-	public boolean Add(Integer element, LocalDateTime time) {
+	public boolean Add(Object element, LocalDateTime time) {
 		// If element exists in addSet, compare the existing time stamp to parameter "time".
 		// Only update time stamp when parameter "time" is more recent.
 		LocalDateTime existing_time = addSet.get(element);
@@ -45,7 +45,7 @@ public class LWW {
 	 *            The time stamp of the remove action.
 	 * @return Returns true if removing element successfully.
 	 */
-	public boolean Remove(Integer element, LocalDateTime time) {
+	public boolean Remove(Object element, LocalDateTime time) {
 		// If element exists in removeSet, compare the existing time stamp to parameter "time".
 		// Only update time stamp when parameter "time" is more recent.
 		LocalDateTime existing_time = removeSet.get(element);
