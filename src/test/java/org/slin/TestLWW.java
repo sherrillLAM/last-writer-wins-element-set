@@ -1,11 +1,9 @@
 package org.slin;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,10 +20,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class TestLWW {
 	/* Object under test. */
 	private LWW lww;
-	
+
+	private Integer element1;
+
 	@Before
 	public void setUp() throws Exception {
 		lww = new LWW();
+		element1 = new Integer(1);
 	}
 
 	@After
@@ -38,50 +39,17 @@ public class TestLWW {
 	}
 
 	/**
-	 * This test verifies New() function initializes addSet and removeSet properly.
-	 */
-	@Test
-	public void New_Null_Success() {
-		lww.New();
-		ConcurrentHashMap<Object, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
-		assertNotNull(addSet);
-		ConcurrentHashMap<Object, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
-		assertNotNull(removeSet);
-	}
-
-	/**
-	 * This test verifies calling New() function twice does not initialize addSet and removeSet twice.
-	 */
-	@Test
-	public void New_NotNull_Success() {
-		lww.New();
-		ConcurrentHashMap<Object, LocalDateTime> addSet1 = Whitebox.getInternalState(lww,"addSet");
-		ConcurrentHashMap<Object, LocalDateTime> removeSet1 = Whitebox.getInternalState(lww,"removeSet");
-		lww.New();
-		ConcurrentHashMap<Object, LocalDateTime> addSet2 = Whitebox.getInternalState(lww,"addSet");
-		ConcurrentHashMap<Object, LocalDateTime> removeSet2 = Whitebox.getInternalState(lww,"removeSet");
-
-		// Verify the two addSets are the same object
-		assertTrue(addSet1 == addSet2);
-		// Verify the two removeSets are the same object
-		assertTrue(removeSet1 == removeSet2);
-	}
-
-	/**
 	 * This test verifies Add() function adds an element to addSet successfully.
 	 */
 	@Test
-	public void Add_AddSetNotNull_Success() {
-		lww.New();
-		
-		Integer element = new Integer(1);
-		boolean addResult = lww.Add(element, LocalDateTime.now());
+	public void Add_AddOnce_Success() {
+		boolean addResult = lww.Add(element1, LocalDateTime.now());
 
 		// Verify Add() function returns true.
 		assertTrue(addResult);
 		// Verify element is added to addSet.
-		ConcurrentHashMap<Object, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
-		assertNotNull(addSet.get(element));
+		ConcurrentHashMap<Integer, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
+		assertNotNull(addSet.get(element1));
 	}
 
 	/**
@@ -90,22 +58,19 @@ public class TestLWW {
 	 */
 	@Test
 	public void Add_AddTwice_Success() {
-		lww.New();
-		
-		Integer element = new Integer(1);
 		LocalDateTime time1 = LocalDateTime.now();
-		boolean addResult1 = lww.Add(element, time1);
+		boolean addResult1 = lww.Add(element1, time1);
 		// Add the same element again with a time stamp a minute later
 		LocalDateTime time2 = time1.plusMinutes(1);
-		boolean addResult2 = lww.Add(element, time2);
+		boolean addResult2 = lww.Add(element1, time2);
 
 		// Verify Add() function returns true.
 		assertTrue(addResult1);
 		assertTrue(addResult2);
 		// Verify element is added to addSet, and time stamp is updated.
-		ConcurrentHashMap<Object, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
-		assertNotEquals(time1, addSet.get(element));
-		assertEquals(time2, addSet.get(element));
+		ConcurrentHashMap<Integer, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
+		assertNotEquals(time1, addSet.get(element1));
+		assertEquals(time2, addSet.get(element1));
 	}
 
 	/**
@@ -114,54 +79,33 @@ public class TestLWW {
 	 */
 	@Test
 	public void Add_AddWithOlderTimestamp_Success() {
-		lww.New();
-		
-		Integer element = new Integer(1);
 		LocalDateTime time1 = LocalDateTime.now();
-		boolean addResult1 = lww.Add(element, time1);
+		boolean addResult1 = lww.Add(element1, time1);
 		// Add the same element again with a time stamp a minute before
 		LocalDateTime time2 = time1.minusMinutes(1);
-		boolean addResult2 = lww.Add(element, time2);
+		boolean addResult2 = lww.Add(element1, time2);
 
 		// Verify Add() function returns true.
 		assertTrue(addResult1);
 		assertTrue(addResult2);
 		// Verify time stamp in addSet is not updated.
-		ConcurrentHashMap<Object, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
-		assertEquals(time1, addSet.get(element));
-		assertNotEquals(time2, addSet.get(element));
-	}
-
-	/**
-	 * This test verifies Add() function fails to add an element to addSet without calling New().
-	 */
-	@Test
-	public void Add_AddSetNull_Fail() {
-		Integer element = new Integer(1);
-		boolean addResult = lww.Add(element, LocalDateTime.now());
-
-		// Verify Add() function returns false.
-		assertFalse(addResult);
-		// Verify addSet is null.
-		ConcurrentHashMap<Object, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
-		assertNull(addSet);
+		ConcurrentHashMap<Integer, LocalDateTime> addSet = Whitebox.getInternalState(lww,"addSet");
+		assertEquals(time1, addSet.get(element1));
+		assertNotEquals(time2, addSet.get(element1));
 	}
 
 	/**
 	 * This test verifies Remove() function adds an element to removeSet successfully.
 	 */
 	@Test
-	public void Remove_RemoveSetNotNull_Success() {
-		lww.New();
-
-		Integer element = new Integer(1);
-		boolean removeResult = lww.Remove(element, LocalDateTime.now());
+	public void Remove_RemoveOnce_Success() {
+		boolean removeResult = lww.Remove(element1, LocalDateTime.now());
 
 		// Verify Remove() function returns true.
 		assertTrue(removeResult);
 		// Verify element is added to removeSet.
-		ConcurrentHashMap<Object, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
-		assertNotNull(removeSet.get(element));
+		ConcurrentHashMap<Integer, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
+		assertNotNull(removeSet.get(element1));
 	}
 
 	/**
@@ -170,22 +114,19 @@ public class TestLWW {
 	 */
 	@Test
 	public void Remove_RemoveTwice_Success() {
-		lww.New();
-		
-		Integer element = new Integer(1);
 		LocalDateTime time1 = LocalDateTime.now();
-		boolean removeResult1 = lww.Remove(element, time1);
+		boolean removeResult1 = lww.Remove(element1, time1);
 		// Remove the same element again with a time stamp a minute later
 		LocalDateTime time2 = time1.plusMinutes(1);
-		boolean removeResult2 = lww.Remove(element, time2);
+		boolean removeResult2 = lww.Remove(element1, time2);
 
 		// Verify Remove() function returns true.
 		assertTrue(removeResult1);
 		assertTrue(removeResult2);
 		// Verify element is added to removeSet, and time stamp is updated.
-		ConcurrentHashMap<Object, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
-		assertNotEquals(time1, removeSet.get(element));
-		assertEquals(time2, removeSet.get(element));
+		ConcurrentHashMap<Integer, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
+		assertNotEquals(time1, removeSet.get(element1));
+		assertEquals(time2, removeSet.get(element1));
 	}
 
 	/**
@@ -194,36 +135,18 @@ public class TestLWW {
 	 */
 	@Test
 	public void Remove_RemoveWithOlderTimestamp_Success() {
-		lww.New();
-		
-		Integer element = new Integer(1);
 		LocalDateTime time1 = LocalDateTime.now();
-		boolean removeResult1 = lww.Remove(element, time1);
+		boolean removeResult1 = lww.Remove(element1, time1);
 		// Remove the same element again with a time stamp a minute before
 		LocalDateTime time2 = time1.minusMinutes(1);
-		boolean removeResult2 = lww.Remove(element, time2);
+		boolean removeResult2 = lww.Remove(element1, time2);
 
 		// Verify Remove() function returns true.
 		assertTrue(removeResult1);
 		assertTrue(removeResult2);
 		// Verify time stamp in removeSet is not updated.
-		ConcurrentHashMap<Object, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
-		assertEquals(time1, removeSet.get(element));
-		assertNotEquals(time2, removeSet.get(element));
-	}
-
-	/**
-	 * This test verifies Remove() function fails to add an element to removeSet without calling New().
-	 */
-	@Test
-	public void Remove_RemoveSetNull_Fail() {
-		Integer element = new Integer(1);
-		boolean removeResult = lww.Remove(element, LocalDateTime.now());
-
-		// Verify Remove() function returns true.
-		assertFalse(removeResult);
-		// Verify removeSet is null.
-		ConcurrentHashMap<Object, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
-		assertNull(removeSet);
+		ConcurrentHashMap<Integer, LocalDateTime> removeSet = Whitebox.getInternalState(lww,"removeSet");
+		assertEquals(time1, removeSet.get(element1));
+		assertNotEquals(time2, removeSet.get(element1));
 	}
 }
