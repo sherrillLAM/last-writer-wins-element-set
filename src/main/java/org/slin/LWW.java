@@ -1,20 +1,19 @@
 package org.slin;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class LWW {
-	private ConcurrentHashMap<Object, LocalDateTime> addSet;
-	private ConcurrentHashMap<Object, LocalDateTime> removeSet;
+	private LWWHashMap addSet;
+	private LWWHashMap removeSet;
 
 	/**
 	 * Create an empty LWW set and initialize Add set and Remove set.
 	 */
 	public LWW() {
-		addSet = new ConcurrentHashMap<>();
-		removeSet = new ConcurrentHashMap<>();
+		addSet = new LWWHashMap();
+		removeSet = new LWWHashMap();
 	}
-	
+
 	/**
 	 * Add an element to LWW and record the time stamp.
 	 *
@@ -22,18 +21,11 @@ public class LWW {
 	 *            The element being added.
 	 * @param time
 	 *            The time stamp of the add action.
-	 * @return Returns true if adding element successfully.
+	 * @return True if time stamp of the Add action is the latest, false otherwise.
 	 */
 	public boolean Add(Object element, LocalDateTime time) {
-		// If element exists in addSet, compare the existing time stamp to parameter "time".
-		// Only update time stamp when parameter "time" is more recent.
-		LocalDateTime existing_time = addSet.get(element);
-		if(existing_time != null && existing_time.isAfter(time)) {
-			return true;
-		}
-
-		addSet.put(element, time);
-		return true;
+		boolean result = addSet.syncPut(element, time);
+		return result;
 	}
 	
 	/**
@@ -42,18 +34,10 @@ public class LWW {
 	 * @param element
 	 *            The element being removed.
 	 * @param time
-	 *            The time stamp of the remove action.
-	 * @return Returns true if removing element successfully.
+	 *            The time stamp of the Remove action.
+	 * @return True if time stamp of the Remove action is the latest, false otherwise.
 	 */
 	public boolean Remove(Object element, LocalDateTime time) {
-		// If element exists in removeSet, compare the existing time stamp to parameter "time".
-		// Only update time stamp when parameter "time" is more recent.
-		LocalDateTime existing_time = removeSet.get(element);
-		if(existing_time != null && existing_time.isAfter(time)) {
-			return true;
-		}
-
-		removeSet.put(element, time);
-		return true;
+		return removeSet.syncPut(element, time);
 	}
 }
