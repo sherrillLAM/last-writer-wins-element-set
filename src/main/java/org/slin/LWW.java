@@ -1,6 +1,7 @@
 package org.slin;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class LWW {
 	private LWWHashMap addSet;
@@ -24,8 +25,9 @@ public class LWW {
 	 * @return True if time stamp of the Add action is the latest, false otherwise.
 	 */
 	public boolean Add(Object element, LocalDateTime time) {
-		boolean result = addSet.syncPut(element, time);
-		return result;
+		synchronized(addSet) {
+			return addSet.syncPut(element, time);
+		}
 	}
 	
 	/**
@@ -38,6 +40,54 @@ public class LWW {
 	 * @return True if time stamp of the Remove action is the latest, false otherwise.
 	 */
 	public boolean Remove(Object element, LocalDateTime time) {
-		return removeSet.syncPut(element, time);
+		synchronized(removeSet) {
+			return removeSet.syncPut(element, time);
+		}
+	}
+
+	/**
+	 * Determine if an element exists in LWW element set.
+	 *
+	 * @param element
+	 *            The element being checked.
+	 * @return Returns true if the element exists in LWW element set.
+	 */
+	public boolean Exists(Object element) {
+		synchronized(addSet) {
+			synchronized(removeSet) {
+				LocalDateTime addTime = addSet.get(element);
+				LocalDateTime removeTime = removeSet.get(element);
+
+				if(addTime == null) {
+					return false;
+				}
+				if(removeTime == null) {
+					return true;
+				}
+
+				boolean result = addTime.isAfter(removeTime);
+				return result;
+			}
+		}
+	}
+
+	/**
+	 * Get all elements in LWW element set.
+	 *
+	 * @return Returns an array with all elements in LWW element set.
+	 */
+	public ArrayList<Object> Get() {
+		ArrayList<Object> results = new ArrayList<>();
+		synchronized(addSet) {
+			synchronized(removeSet) {
+				for(Object element: addSet.keySet()) {
+					if(Exists(element)) {
+						results.add(element);
+					}
+				}
+			}
+		}
+
+		return results;
 	}
 }

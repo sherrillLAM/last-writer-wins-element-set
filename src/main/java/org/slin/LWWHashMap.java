@@ -2,6 +2,7 @@ package org.slin;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * This class is a wrapper for HashMap class, providing thread-safe operations for original HashMap.
@@ -40,5 +41,14 @@ public class LWWHashMap {
 	 */
 	public LocalDateTime get(Object key) {
 		return map.get(key);
+	}
+
+	/**
+	 * Returns a set view of the keys contained in this map.
+	 *
+	 * @return A set view of the keys contained in this map.
+	 */
+	public Set<Object> keySet() {
+		return map.keySet();
 	}
 }
