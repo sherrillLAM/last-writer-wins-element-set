@@ -18,35 +18,39 @@ import junit.framework.TestCase;
 @RunWith(ConcurrentTestRunner.class)
 public class TestLWW_Add_Remove extends TestCase {
 	/* Object under test. */
-	private LWW lww;
+	private LWW<String> lwwStr;
+	private LWW<Integer> lwwInt;
 
-	private Integer element1;
+	private Integer elementInt;
+	private String elementStr;
 	private final static int THREAD_COUNT = 100;
 	private final static int ACTION_COUNT = 10000;
 
 	@Before
 	public void setUp() throws Exception {
-		lww = new LWW();
-		element1 = new Integer(10);
+		lwwStr = new LWW<String>();
+		lwwInt = new LWW<Integer>();
+		elementInt = new Integer(10);
+		elementStr = "test string";
 	}
 
 	/**
-	 * This test verifies Add() function handles properly given multithreads adding the same element to addSet.
+	 * This test verifies Add() function handles properly given multithreads adding the same Integer to addSet.
 	 */
 	@Test
-	public void Add_GivenMultiThreads_Success() {
+	public void AddInteger_GivenMultiThreads_Success() {
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
 
-			// Execute Add action of element1 for ACTION_COUNT times split among threads.
+			// Execute Add action of elementInt for ACTION_COUNT times split among threads.
 			IntStream.range(0, ACTION_COUNT).forEach(count -> service.submit(() -> {
-		    	LocalDateTime now = LocalDateTime.now();
-				lww.Add(element1, now);
+				LocalDateTime now = LocalDateTime.now();
+				lwwInt.Add(elementInt, now);
 
 				//Verify inserted time, which should be always no earlier than parameter now.
-				LWWHashMap addSet = Whitebox.getInternalState(lww,"addSet");
-				LocalDateTime insertedTime = addSet.get(element1);
+				LWWHashMap<Integer> addSet = Whitebox.getInternalState(lwwInt,"addSet");
+				LocalDateTime insertedTime = addSet.get(elementInt);
 				waiter.assertFalse(now.isAfter(insertedTime));
 
 				waiter.resume();
@@ -62,22 +66,84 @@ public class TestLWW_Add_Remove extends TestCase {
 	}
 
 	/**
-	 * This test verifies Remove() function handles properly given multithreads adding the same element to removeSet.
+	 * This test verifies Add() function handles properly given multithreads adding the same String to addSet.
 	 */
 	@Test
-	public void Remove_GivenMultiThreads_Success() {
+	public void AddString_GivenMultiThreads_Success() {
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
 
-			// Execute Remove action of element1 for ACTION_COUNT times split among threads.
+			// Execute Add action of elementStr for ACTION_COUNT times split among threads.
 			IntStream.range(0, ACTION_COUNT).forEach(count -> service.submit(() -> {
-		    	LocalDateTime now = LocalDateTime.now();
-				lww.Remove(element1, now);
+				LocalDateTime now = LocalDateTime.now();
+				lwwStr.Add(elementStr, now);
 
 				//Verify inserted time, which should be always no earlier than parameter now.
-				LWWHashMap removeSet = Whitebox.getInternalState(lww,"removeSet");
-				LocalDateTime insertedTime = removeSet.get(element1);
+				LWWHashMap<String> addSet = Whitebox.getInternalState(lwwStr,"addSet");
+				LocalDateTime insertedTime = addSet.get(elementStr);
+				waiter.assertFalse(now.isAfter(insertedTime));
+
+				waiter.resume();
+			}));
+
+		    service.awaitTermination(1000, TimeUnit.MILLISECONDS);
+		    //Set timeout as 1 second for waiter to wake up.
+		    waiter.await(1, TimeUnit.SECONDS);
+		    service.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * This test verifies Remove() function handles properly given multithreads adding the same Integer to removeSet.
+	 */
+	@Test
+	public void RemoveInteger_GivenMultiThreads_Success() {
+		try {
+			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
+			Waiter waiter = new Waiter();
+
+			// Execute Remove action of elementInt for ACTION_COUNT times split among threads.
+			IntStream.range(0, ACTION_COUNT).forEach(count -> service.submit(() -> {
+				LocalDateTime now = LocalDateTime.now();
+				lwwInt.Remove(elementInt, now);
+
+				//Verify inserted time, which should be always no earlier than parameter now.
+				LWWHashMap<Integer> removeSet = Whitebox.getInternalState(lwwInt,"removeSet");
+				LocalDateTime insertedTime = removeSet.get(elementInt);
+				waiter.assertFalse(now.isAfter(insertedTime));
+
+				waiter.resume();
+			}));
+
+		    service.awaitTermination(1000, TimeUnit.MILLISECONDS);
+		    //Set timeout as 1 second for waiter to wake up.
+		    waiter.await(1, TimeUnit.SECONDS);
+		    service.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * This test verifies Remove() function handles properly given multithreads adding the same String to removeSet.
+	 */
+	@Test
+	public void RemoveString_GivenMultiThreads_Success() {
+		try {
+			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
+			Waiter waiter = new Waiter();
+
+			// Execute Remove action of elementStr for ACTION_COUNT times split among threads.
+			IntStream.range(0, ACTION_COUNT).forEach(count -> service.submit(() -> {
+				LocalDateTime now = LocalDateTime.now();
+				lwwStr.Remove(elementStr, now);
+
+				//Verify inserted time, which should be always no earlier than parameter now.
+				LWWHashMap<String> removeSet = Whitebox.getInternalState(lwwStr,"removeSet");
+				LocalDateTime insertedTime = removeSet.get(elementStr);
 				waiter.assertFalse(now.isAfter(insertedTime));
 
 				waiter.resume();

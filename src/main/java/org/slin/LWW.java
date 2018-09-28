@@ -3,16 +3,16 @@ package org.slin;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class LWW {
-	private LWWHashMap addSet;
-	private LWWHashMap removeSet;
+public class LWW<T> {
+	private LWWHashMap<T> addSet;
+	private LWWHashMap<T> removeSet;
 
 	/**
 	 * Create an empty LWW set and initialize Add set and Remove set.
 	 */
 	public LWW() {
-		addSet = new LWWHashMap();
-		removeSet = new LWWHashMap();
+		addSet = new LWWHashMap<T>();
+		removeSet = new LWWHashMap<T>();
 	}
 
 	/**
@@ -24,7 +24,7 @@ public class LWW {
 	 *            The time stamp of the add action.
 	 * @return True if time stamp of the Add action is the latest, false otherwise.
 	 */
-	public boolean Add(Object element, LocalDateTime time) {
+	public boolean Add(T element, LocalDateTime time) {
 		synchronized(addSet) {
 			return addSet.syncPut(element, time);
 		}
@@ -39,7 +39,7 @@ public class LWW {
 	 *            The time stamp of the Remove action.
 	 * @return True if time stamp of the Remove action is the latest, false otherwise.
 	 */
-	public boolean Remove(Object element, LocalDateTime time) {
+	public boolean Remove(T element, LocalDateTime time) {
 		synchronized(removeSet) {
 			return removeSet.syncPut(element, time);
 		}
@@ -52,7 +52,7 @@ public class LWW {
 	 *            The element being checked.
 	 * @return Returns true if the element exists in LWW element set.
 	 */
-	public boolean Exists(Object element) {
+	public boolean Exists(T element) {
 		synchronized(addSet) {
 			synchronized(removeSet) {
 				LocalDateTime addTime = addSet.get(element);
@@ -76,11 +76,11 @@ public class LWW {
 	 *
 	 * @return Returns an array with all elements in LWW element set.
 	 */
-	public ArrayList<Object> Get() {
-		ArrayList<Object> results = new ArrayList<>();
+	public ArrayList<T> Get() {
+		ArrayList<T> results = new ArrayList<>();
 		synchronized(addSet) {
 			synchronized(removeSet) {
-				for(Object element: addSet.keySet()) {
+				for(T element: addSet.keySet()) {
 					if(Exists(element)) {
 						results.add(element);
 					}

@@ -30,7 +30,7 @@ public class TestLWW_Get extends TestCase {
 	@Test
 	@ThreadCount(THREAD_COUNT)
 	public void Add_Remove_0() {
-		LWW lww = new LWW();
+		LWW<Integer> lww = new LWW<Integer>();
 		
 		for(int i = 0; i < ACTION_COUNT; i++) {
 			lww.Add(elements[0], LocalDateTime.now());
@@ -44,7 +44,7 @@ public class TestLWW_Get extends TestCase {
 	@Test
 	@ThreadCount(THREAD_COUNT)
 	public void Add_Remove_Add_1() {
-		LWW lww = new LWW();
+		LWW<Integer> lww = new LWW<Integer>();
 		
 		for(int i = 0; i < ACTION_COUNT; i++) {
 			lww.Add(elements[1], LocalDateTime.now());
@@ -52,7 +52,7 @@ public class TestLWW_Get extends TestCase {
 			lww.Add(elements[1], LocalDateTime.now().plusNanos(10));
 
 			// Verify LWW set has only one element and the element is elements[1].
-			ArrayList<Object> results = lww.Get();
+			ArrayList<Integer> results = lww.Get();
 			assertTrue(results.size() == 1);
 			assertTrue(results.contains(elements[1]));
 		}

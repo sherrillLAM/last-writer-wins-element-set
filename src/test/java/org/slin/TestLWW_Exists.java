@@ -19,7 +19,7 @@ import net.jodah.concurrentunit.Waiter;
 @RunWith(ConcurrentTestRunner.class)
 public class TestLWW_Exists extends TestCase {
 	/* Object under test. */
-	private LWW lww;
+	private LWW<Integer> lww;
 
 	private Integer[] elements;
 	private final static int THREAD_COUNT = 1000;
@@ -27,7 +27,7 @@ public class TestLWW_Exists extends TestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		lww = new LWW();
+		lww = new LWW<Integer>();
 		elements = new Integer[5];
 		for(int i = 0; i < 5; i++) {
 			elements[i] = new Integer(i);
