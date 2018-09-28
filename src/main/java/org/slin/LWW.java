@@ -2,16 +2,16 @@ package org.slin;
 
 import java.time.LocalDateTime;
 
-public class LWW {
-	private LWWHashMap addSet;
-	private LWWHashMap removeSet;
+public class LWW<T> {
+	private LWWHashMap<T> addSet;
+	private LWWHashMap<T> removeSet;
 
 	/**
 	 * Create an empty LWW set and initialize Add set and Remove set.
 	 */
 	public LWW() {
-		addSet = new LWWHashMap();
-		removeSet = new LWWHashMap();
+		addSet = new LWWHashMap<T>();
+		removeSet = new LWWHashMap<T>();
 	}
 
 	/**
@@ -23,9 +23,10 @@ public class LWW {
 	 *            The time stamp of the add action.
 	 * @return True if time stamp of the Add action is the latest, false otherwise.
 	 */
-	public boolean Add(Object element, LocalDateTime time) {
-		boolean result = addSet.syncPut(element, time);
-		return result;
+	public boolean Add(T element, LocalDateTime time) {
+		synchronized(addSet) {
+			return addSet.syncPut(element, time);
+		}
 	}
 	
 	/**
@@ -37,7 +38,9 @@ public class LWW {
 	 *            The time stamp of the Remove action.
 	 * @return True if time stamp of the Remove action is the latest, false otherwise.
 	 */
-	public boolean Remove(Object element, LocalDateTime time) {
-		return removeSet.syncPut(element, time);
+	public boolean Remove(T element, LocalDateTime time) {
+		synchronized(removeSet) {
+			return removeSet.syncPut(element, time);
+		}
 	}
 }
