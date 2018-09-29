@@ -23,7 +23,7 @@ public class RedisZset<T> {
 	private RScoredSortedSet<T> zset;
 
 	/** The configuration file for Redis server connection. */
-	private final static String CONFIG_FILE_PATH = "config/singleNodeConfig.json";
+	private final static String CONFIG_FILE_PATH = "config/RedisConfig.json";
 
 	/**
 	 * Constructor for RedisZset class.
