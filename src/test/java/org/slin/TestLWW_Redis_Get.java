@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.redisson.client.RedisConnectionException;
 
 import com.anarsoft.vmlens.concurrent.junit.ConcurrentTestRunner;
 import com.anarsoft.vmlens.concurrent.junit.ThreadCount;
@@ -23,18 +24,27 @@ public class TestLWW_Redis_Get extends TestCase {
 	private final static int THREAD_COUNT = 1;
 	private final static int ACTION_COUNT = 10;
 
+	private boolean skipTest = false;
+
 	@Before
-	public void setUp() throws Exception {
-		lww = new LWW_Redis<Integer>("int");
-		elements = new Integer[3];
-		for(int i = 0; i < 3; i++) {
-			elements[i] = new Integer(i);
+	public void setUp() {
+		try {
+			lww = new LWW_Redis<Integer>("int");
+			elements = new Integer[3];
+			for(int i = 0; i < 3; i++) {
+				elements[i] = new Integer(i);
+			}
+		} catch (RedisConnectionException e) {
+			System.out.println("Cannot connect to Redis server. Skipping all tests in TestLWW_Redis_Get...");
+			skipTest = true;
 		}
 	}
 	
 	@Test
 	@ThreadCount(THREAD_COUNT)
 	public void Add_Remove_0() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		for(int i = 0; i < ACTION_COUNT; i++) {
 			lww.Add(elements[0], LocalDateTime.now());
 			lww.Remove(elements[0], LocalDateTime.now());
@@ -48,6 +58,8 @@ public class TestLWW_Redis_Get extends TestCase {
 	@Test
 	@ThreadCount(THREAD_COUNT)
 	public void Add_Remove_Add_1() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		for(int i = 0; i < ACTION_COUNT; i++) {
 			lww.Add(elements[1], LocalDateTime.now());
 			lww.Remove(elements[1], LocalDateTime.now());
@@ -61,6 +73,8 @@ public class TestLWW_Redis_Get extends TestCase {
 
 	@After
 	public void cleanUp() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		lww.disconnect();
 	}
 }

@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.reflect.Whitebox;
+import org.redisson.client.RedisConnectionException;
+
 import com.anarsoft.vmlens.concurrent.junit.ConcurrentTestRunner;
 import net.jodah.concurrentunit.Waiter;
 
@@ -27,12 +29,19 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 	private final static int THREAD_COUNT = 100;
 	private final static int ACTION_COUNT = 1000;
 
+	private boolean skipTest = false;
+
 	@Before
-	public void setUp() throws Exception {
-		lwwStr = new LWW_Redis<String>("string");
-		lwwInt = new LWW_Redis<Integer>("int");
-		elementInt = new Integer(10);
-		elementStr = "test string";
+	public void setUp() {
+		try {
+			lwwStr = new LWW_Redis<String>("string");
+			lwwInt = new LWW_Redis<Integer>("int");
+			elementInt = new Integer(10);
+			elementStr = "test string";
+		} catch (RedisConnectionException e) {
+			System.out.println("Cannot connect to Redis server. Skipping all tests in TestLWW_Redis_Add_Remove...");
+			skipTest = true;
+		}
 	}
 
 	/**
@@ -40,6 +49,8 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 	 */
 	@Test
 	public void AddInteger_GivenMultiThreads_Success() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
@@ -71,6 +82,8 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 	 */
 	@Test
 	public void AddString_GivenMultiThreads_Success() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
@@ -102,6 +115,8 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 	 */
 	@Test
 	public void RemoveInteger_GivenMultiThreads_Success() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
@@ -133,6 +148,8 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 	 */
 	@Test
 	public void RemoveString_GivenMultiThreads_Success() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(THREAD_COUNT);
 			Waiter waiter = new Waiter();
@@ -161,6 +178,8 @@ public class TestLWW_Redis_Add_Remove extends TestCase {
 
 	@After
 	public void cleanUp() {
+		org.junit.Assume.assumeFalse(skipTest);
+
 		lwwInt.disconnect();
 		lwwStr.disconnect();
 	}
