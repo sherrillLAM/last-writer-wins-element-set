@@ -11,7 +11,7 @@ There are two implementations, one with Java HashMap class, another one with Red
 
 # Builds
 
-To execute a local build, run `gradlew build` from the root repository directory.
+To execute a local build, run `./gradlew build` from the root repository directory.
 
 # How to use Redis based LWW set
 
